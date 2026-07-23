@@ -1,23 +1,25 @@
 # Nesk Drive
 
 Nesk Drive is the Windows desktop sync client for [Nesk](https://files.nesk.ch).
-It synchronizes files and authenticates only with the fixed Nesk service at
-`https://files.nesk.ch`.
+Nesk releases must synchronize files and authenticate only with the fixed Nesk
+service at `https://files.nesk.ch`.
 
 ## Pilot support
 
-The pilot release supports Windows 10 x64 and Windows 11 x64. Its application
+The pilot release target is Windows 10 x64 and Windows 11 x64. Its application
 ID is `ch.nesk.drive`.
 
 ## Network and privacy
 
-Nesk Drive does not include telemetry and does not automatically upload crash
-reports. Nesk Drive network traffic is limited to:
+Nesk Drive release requirements prohibit telemetry and automatic crash-report
+uploads. A Nesk release must limit its Nesk-operated network destinations to:
 
 - `files.nesk.ch` for authentication and synchronization;
 - `downloads.nesk.ch` for user-requested and periodic update checks.
 
-The update service is not contacted for other purposes. See
+Nesk releases must not use the update service for other purposes. Enforcement
+of these requirements is delivered through the release implementation and
+verification work for this fork. See
 [PRIVACY.md](PRIVACY.md) for the data-handling policy and
 [SECURITY.md](SECURITY.md) for reporting a security issue.
 

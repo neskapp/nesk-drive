@@ -5,44 +5,58 @@ Free code signing provided by SignPath.io, certificate by SignPath Foundation.
 ## Scope
 
 This policy applies to every Nesk Drive Windows release artifact, including
-installers, executables, and update payloads. Signed artifacts are produced
-only from reviewed commits on protected Nesk release branches.
+installers, executables, and update payloads. A release may be signed only
+from a reviewed commit after every gate in this policy is configured and
+verified.
 
-## Roles and access
+## Bootstrap ownership and independent roles
 
-The repository uses role-based GitHub teams rather than personal accounts:
+[`Neprena`](https://github.com/Neprena) is a GitHub user account, not a GitHub
+organization, so it cannot provide GitHub teams. During bootstrap, repository
+role ownership is recorded at that stable account URL:
 
-- Maintainers: [Nesk Drive maintainers](https://github.com/orgs/Neprena/teams/nesk-drive-maintainers)
-- Reviewers: [Nesk Drive reviewers](https://github.com/orgs/Neprena/teams/nesk-drive-reviewers)
-- Signing approvers: [Nesk Drive signing approvers](https://github.com/orgs/Neprena/teams/nesk-drive-signing-approvers)
+- Bootstrap maintainer and repository owner:
+  [Neprena](https://github.com/Neprena)
+- Independent reviewer: required repository-collaborator role; unassigned
+  until a qualified collaborator is added and verified
+- Independent signing approver: required repository-collaborator role;
+  unassigned until a qualified collaborator is added and verified
 
-Membership must require two-factor authentication. Until the corresponding
-Neprena GitHub teams are provisioned and access is verified, these role URLs
-are the operational ownership record; release signing must not proceed on the
-strength of an unverified or personal-account assignment.
+The bootstrap maintainer is not an independent reviewer or signing approver.
+Every person assigned to a release role must use two-factor authentication.
+All release and signing activity is blocked until an independent reviewer and
+an independent signing approver are added, their identities and two-factor
+authentication are verified, and their repository access is recorded.
 
 ## Review and signing requirements
 
-- Changes proposed by a non-maintainer require a pull request review from a
-  maintainer or reviewer before merge.
-- Every signing request requires explicit approval by a member of the signing
-  approvers team; no request is implicitly or automatically approved.
-- The approver verifies the source commit, intended release version, generated
-  artifact names, and release channel before approving the request.
-- Signing credentials and the SignPath API token are restricted to the signing
-  environment and are never committed to the repository or distributed to
-  individual contributors.
+- A change proposed by a non-maintainer must arrive by pull request and receive
+  the independent reviewer's approval before merge.
+- Every change to a release branch requires one approval. A change from a
+  non-maintainer requires a pull request review from the independent reviewer
+  before merge.
+- Every signing request requires explicit manual approval by the independent,
+  verified signing approver; no request is implicitly or automatically
+  approved.
+- The signing approver must verify the source commit, intended release version,
+  generated artifact names, and release channel before approving the request.
+- Signing credentials and the SignPath API token must be restricted to the
+  signing environment and must never be committed to the repository or
+  distributed to individual contributors.
 - A signing approval and its resulting artifact identifiers must be retained in
   the release record for auditability.
 
-## Repository and environment controls
+## Mandatory repository and environment gates
 
-The `nesk/stable-7.1` and `main` branches are release-controlled branches:
-pull requests and one approval are required, stale approvals are dismissed,
-required CI must pass, and force pushes and branch deletion are disabled.
+Before any Nesk release, administrators must configure and verify these GitHub
+branch-protection gates on `nesk/stable-7.1` and `main`: pull requests and one
+approval required, stale approvals dismissed, required CI passing, and force
+pushes and branch deletion disabled.
 
-The `signpath` environment requires manual approval and holds
-`SIGNPATH_API_TOKEN`. The `release` environment requires manual approval and
-holds the manifest private key and storage credentials. Repository
-administrators configure these controls in GitHub; this policy does not grant
-an exception when a control is missing.
+Before any signing request, administrators must configure and verify a
+`signpath` environment that requires manual approval and restricts
+`SIGNPATH_API_TOKEN` to that environment. Before a release is published,
+administrators must configure and verify a `release` environment that requires
+manual approval and restricts the manifest private key and storage credentials
+to that environment. Missing, unverified, or bypassed controls block signing
+and release; this policy grants no exception.

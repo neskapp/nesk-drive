@@ -1,24 +1,25 @@
 # Nesk Drive privacy
 
-Nesk Drive is a Windows client for the fixed Nesk service at
-`https://files.nesk.ch`. The pilot supports Windows 10 x64 and Windows 11 x64.
+This policy sets requirements for Nesk Drive releases. Nesk releases must use
+the fixed Nesk service at `https://files.nesk.ch`; the pilot target is Windows
+10 x64 and Windows 11 x64.
 
 ## Data and destinations
 
-To authenticate and synchronize, Nesk Drive communicates with
-`files.nesk.ch`. Those requests contain the account, authentication, file, and
-synchronization data necessary to provide the service.
+To authenticate and synchronize, a Nesk release must communicate with
+`files.nesk.ch`. Those requests may contain the account, authentication, file,
+and synchronization data necessary to provide the service.
 
-Nesk Drive contacts `downloads.nesk.ch` only for user-requested and periodic
-update checks. Update checks request release/update information; they are not
-used for analytics or advertising.
+Nesk releases may contact `downloads.nesk.ch` only for user-requested and
+periodic update checks. Update checks must request release/update information
+only; they must not be used for analytics or advertising.
 
 ## No telemetry or automatic crash uploads
 
-Nesk Drive does not include telemetry. It does not automatically upload crash
-reports. The client has no telemetry endpoint and no crash-report upload
-endpoint. If a user chooses to seek support, they decide what diagnostic
-information to share through the selected support channel.
+Nesk releases must not include telemetry or automatically upload crash reports.
+They must not use a telemetry endpoint or a crash-report upload endpoint. If a
+user chooses to seek support, they decide what diagnostic information to share
+through the selected support channel.
 
 ## Changes to this policy
 

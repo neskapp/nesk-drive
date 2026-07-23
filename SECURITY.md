@@ -14,12 +14,13 @@ in a public issue.
 ## Supported release line
 
 The supported pilot line is `nesk/stable-7.1`, based on ownCloud Desktop Client
-`v7.1.0`. Security fixes are evaluated for that line and are published as
-signed Nesk Drive releases when applicable.
+`v7.1.0`. Security fixes are evaluated for that line. A Nesk Drive release may
+be published only after the signing and release gates in
+[CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md) are configured and verified.
 
 ## Coordinated disclosure
 
 We will acknowledge a valid private report, investigate it, and coordinate a
-fix and disclosure with the reporter where practical. Releases follow
-[CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md). Nesk Drive's service endpoint
-is `https://files.nesk.ch`; update checks use `https://downloads.nesk.ch`.
+fix and disclosure with the reporter where practical. Nesk release policy
+requires `https://files.nesk.ch` for the service and permits
+`https://downloads.nesk.ch` only for update checks.

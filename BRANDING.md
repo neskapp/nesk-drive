@@ -6,7 +6,7 @@ The product name is **Nesk Drive**. Use that name in release notes, installer
 copy, user-facing documentation, and support material.
 
 - Application ID: `ch.nesk.drive`
-- Fixed service: `https://files.nesk.ch`
+- Required service for Nesk releases: `https://files.nesk.ch`
 - Supported pilot operating systems: Windows 10 x64 and Windows 11 x64
 
 Nesk Drive is a branded, GPL-2.0-or-later fork of the ownCloud Desktop Client.
