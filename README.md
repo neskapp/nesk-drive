@@ -1,75 +1,62 @@
-# ownCloud Desktop Client
+# Nesk Drive
 
-[![Build Status](https://drone.owncloud.com/api/badges/owncloud/client/status.svg)](https://drone.owncloud.com/owncloud/client) [![Build Status](https://github.com/owncloud/client/workflows/ownCloud%20CI/badge.svg)](https://github.com/owncloud/client/actions)
+Nesk Drive is the Windows desktop sync client for [Nesk](https://files.nesk.ch).
+It synchronizes files and authenticates only with the fixed Nesk service at
+`https://files.nesk.ch`.
 
-## Introduction
+## Pilot support
 
-The ownCloud Desktop Client is a tool to synchronize files from ownCloud Server
-with your computer.
+The pilot release supports Windows 10 x64 and Windows 11 x64. Its application
+ID is `ch.nesk.drive`.
 
-## Download
+## Network and privacy
 
-### Binary packages
+Nesk Drive does not include telemetry and does not automatically upload crash
+reports. Nesk Drive network traffic is limited to:
 
-- Refer to the download page https://owncloud.com/desktop-app/
+- `files.nesk.ch` for authentication and synchronization;
+- `downloads.nesk.ch` for user-requested and periodic update checks.
 
-### Source code
+The update service is not contacted for other purposes. See
+[PRIVACY.md](PRIVACY.md) for the data-handling policy and
+[SECURITY.md](SECURITY.md) for reporting a security issue.
 
-The ownCloud Desktop Client is developed in Git. Since Git makes it easy to
-fork and improve the source code and to adapt it to your need, many copies
-can be found on the Internet, in particular on GitHub. However, the
-authoritative repository maintained by the developers is located at
-https://github.com/owncloud/client.
+## Releases and source
 
-### Building from source
+This repository is a fork of the [ownCloud Desktop Client](https://github.com/owncloud/client),
+based on upstream release `v7.1.0` at commit
+`37837175c2f542086c52255dc42282d2687ad8a1`. Nesk changes are made on
+`nesk/stable-7.1`; changes from upstream are reviewed and deliberately merged
+instead of being automatically rebased or imported. The upstream project
+remains the authoritative source for its own releases.
 
-This project uses CMake as build system. Please refer to the cmake documentation
-for general instructions on how to use CMake: https://cmake.org/documentation/.
+Nesk Drive is distributed under the GNU General Public License, version 2 or
+(at your option) any later version (GPL-2.0-or-later). A copy is in
+[COPYING](COPYING). When distributing binaries or modified versions, we will
+provide the corresponding source code and retain the required license,
+copyright, and warranty notices. The complete source for Nesk releases is
+available from this repository and its release tags.
 
-Further more as meta build system KDE Craft is used. Please refer to the KDE Craft
-documentation for instructions on how to use Craft: https://community.kde.org/Craft.
+Release-signing controls are described in [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
+Product naming and identifiers are described in [BRANDING.md](BRANDING.md).
 
-For easy to use instructions on how to build the ownCloud Desktop Client please have 
-a look at https://github.com/owncloud/ownbuild.
+## Building from source
 
-## Reporting issues and contributing
+This project uses CMake and KDE Craft. General build information is available
+from the [CMake documentation](https://cmake.org/documentation/) and the
+[KDE Craft documentation](https://community.kde.org/Craft). The upstream
+project also provides [ownbuild instructions](https://github.com/owncloud/ownbuild).
 
-If you find any bugs or have any suggestion for improvement, please
-file an issue at https://github.com/owncloud/client/issues. Do not
-contact the authors directly by mail, as this increases the chance
-of your report being lost.
+## Upstream notices and contribution history
 
-If you created a patch, please submit a [Pull
-Request](https://github.com/owncloud/client/pulls). For non-trivial
-patches, we need you to sign the [Contributor
-Agreement](https://owncloud.com/contribute/join-the-development/contributor-agreement/) before
-we can accept your patch.
+Nesk Drive is derived from the ownCloud Desktop Client, which is developed by
+the ownCloud community and [has received patches from many
+authors](https://github.com/owncloud/client/graphs/contributors). Historical
+upstream maintainers listed by the upstream README include Markus Goetz,
+Olivier Goffart, Christian Kamm, Thomas Müller, Klaas Freitag, Daniel
+Molkentin, and Andreas Schneider. Their copyright and license notices remain
+in the source tree.
 
-
-## Maintainers and Contributors
-
-ownCloud Desktop Client is developed by the ownCloud community and [receives
-patches from a variety of authors](https://github.com/owncloud/client/graphs/contributors).
-
-Past maintainers:
-
-- Markus Goetz <guruz@owncloud.com>
-- Olivier Goffart <ogoffart@owncloud.com>
-- Christian Kamm <mail@ckamm.de>
-- Thomas Müller <thomas.mueller@owncloud.com>
-- Klaas Freitag <freitag@owncloud.com>
-- Daniel Molkentin <daniel@molkentin.de>
-- Andreas Schneider <asn@cryptomilk.org>
-
-## License
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-    or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
-    for more details.
-
+For Nesk-specific bugs or improvement proposals, open an issue in this
+repository. For security-sensitive reports, follow [SECURITY.md](SECURITY.md)
+instead of opening a public issue.
