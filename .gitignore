@@ -2,6 +2,8 @@
 # ignore of /branding/ is intentionally removed. See BRANDING.md and THEME.cmake.
 .gitmodules
 *build*/
+# Local prefix for hand-built external deps (LibreGraphAPI, KDSingleApplication)
+/.deps/
 *flymake*
 CMakeLists.txt.user*
 .vs/
