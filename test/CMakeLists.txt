@@ -24,6 +24,11 @@ owncloud_add_test(ExcludedFiles)
 owncloud_add_test(Utility)
 owncloud_add_test(AppConfig ../src/libsync/owncloudtheme.cpp)
 
+# Nesk Drive branding test: only meaningful when the Nesk OEM theme is compiled in.
+if(APPLICATION_SHORTNAME STREQUAL "nesk-drive")
+    owncloud_add_test(NeskTheme)
+endif()
+
 owncloud_add_test(SyncEngine)
 owncloud_add_test(SyncMove)
 add_dependencies(SyncMoveTest test_helper)

@@ -1,0 +1,5 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M108 0H20C8.9543 0 0 8.9543 0 20V108C0 119.046 8.9543 128 20 128H108C119.046 128 128 119.046 128 108V20C128 8.9543 119.046 0 108 0Z" fill="#B23A4E"/>
+  <text x="30" y="92" font-family="'Schibsted Grotesk','Segoe UI',Arial,sans-serif" font-size="78" font-weight="800" letter-spacing="-3.5" fill="#ffffff">n</text>
+  <circle cx="94" cy="84" r="11" fill="#EC6F82"/>
+</svg>

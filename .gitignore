@@ -1,4 +1,5 @@
-/branding/
+# Nesk Drive carries its OEM branding in-repo (public GPL fork); the upstream
+# ignore of /branding/ is intentionally removed. See BRANDING.md and THEME.cmake.
 .gitmodules
 *build*/
 *flymake*
