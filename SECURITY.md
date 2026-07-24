@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Do not report a security vulnerability in a public issue. Use the
-[private GitHub security advisory form](https://github.com/Neprena/nesk-drive/security/advisories/new)
+[private GitHub security advisory form](https://github.com/neskapp/nesk-drive/security/advisories/new)
 for this repository. Include a clear description, affected release or commit,
 reproduction steps, and any suggested mitigation.
 

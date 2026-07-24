@@ -9,24 +9,21 @@ installers, executables, and update payloads. A release may be signed only
 from a reviewed commit after every gate in this policy is configured and
 verified.
 
-## Bootstrap ownership and independent roles
+## Ownership and independent roles
 
-[`Neprena`](https://github.com/Neprena) is a GitHub user account, not a GitHub
-organization, so it cannot provide GitHub teams. During bootstrap, repository
-role ownership is recorded at that stable account URL:
+The repository is owned by the [`neskapp`](https://github.com/neskapp)
+organization. Release responsibilities are assigned through these stable
+GitHub teams:
 
-- Bootstrap maintainer and repository owner:
-  [Neprena](https://github.com/Neprena)
-- Independent reviewer: required repository-collaborator role; unassigned
-  until a qualified collaborator is added and verified
-- Independent signing approver: required repository-collaborator role;
-  unassigned until a qualified collaborator is added and verified
+- [Nesk Drive maintainers](https://github.com/orgs/neskapp/teams/nesk-drive-maintainers)
+- [Nesk Drive reviewers](https://github.com/orgs/neskapp/teams/nesk-drive-reviewers)
+- [Nesk Drive signing approvers](https://github.com/orgs/neskapp/teams/nesk-drive-signing-approvers)
 
-The bootstrap maintainer is not an independent reviewer or signing approver.
 Every person assigned to a release role must use two-factor authentication.
-All release and signing activity is blocked until an independent reviewer and
-an independent signing approver are added, their identities and two-factor
-authentication are verified, and their repository access is recorded.
+The author of a release change cannot supply its independent review or approve
+its signing request. Release and signing activity remains blocked until the
+reviewer and signing-approver teams each contain a qualified independent
+member and their access and two-factor authentication are verified.
 
 ## Review and signing requirements
 
