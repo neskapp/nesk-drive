@@ -136,21 +136,49 @@ jobs:
       - name: Prepare artifacts
         run: |
           Copy-Item "$env:HOME/craft/binaries/*" "${env:GITHUB_WORKSPACE}/binaries/" -ErrorAction SilentlyContinue
+          # Craft records the configure arguments, OIDC registration included, in its package
+          # manifest. That file has no value for whoever installs the client and must never be
+          # published: it would put the client secret in plain text in a downloadable artifact.
+          Remove-Item "${env:GITHUB_WORKSPACE}/binaries/manifest*.json" -Force -ErrorAction SilentlyContinue
           Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" | Format-Table Name, Length
+
+      - name: Make sure no published file leaks the registration
+        env:
+          NESK_CLIENT_SECRET: ${{ secrets.NESK_OIDC_CLIENT_SECRET }}
+        run: |
+          # The compiled client necessarily embeds its own registration, that is the nature of a
+          # public native client. Everything else we publish must be free of it.
+          if (-not $env:NESK_CLIENT_SECRET) {
+            Write-Output "No registration configured, nothing to check"
+            exit 0
+          }
+          $suspect = @(Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" -File |
+            Where-Object { $_.Extension -in @(".json", ".txt", ".sha256", ".nsi", ".log") })
+          foreach ($file in $suspect) {
+            if (Select-String -Path $file.FullName -Pattern $env:NESK_CLIENT_SECRET -SimpleMatch -Quiet) {
+              throw "$($file.Name) contains the client secret and must not be published"
+            }
+          }
+          Write-Output "Checked $($suspect.Count) text files, none carries the registration"
 
       - name: Check the installer identity
         run: |
-          # The branding must survive packaging: an installer still named after the upstream product
-          # would mean the OEM theme was not picked up by this build.
+          # The installer file name comes from the Craft blueprint and carries the branch name, so it
+          # says nothing about the branding. What matters is the executable inside: it is named after
+          # APPLICATION_EXECUTABLE, so finding nesk-drive.exe proves the OEM theme was picked up.
           $installers = @(Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" -Filter "*.exe" -ErrorAction SilentlyContinue)
           if ($installers.Count -eq 0) {
             throw "No Windows installer was produced"
           }
-          $branded = @($installers | Where-Object { $_.Name -match "(?i)nesk" })
-          if ($branded.Count -eq 0) {
-            throw "No installer carries the Nesk branding, found: $($installers.Name -join ', ')"
+          Write-Output "Installer: $($installers.Name -join ', ')"
+
+          $buildDir = (& "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --get buildDir -q owncloud-client | Where-Object { $_ -and $_.Trim() } | Select-Object -Last 1).Trim()
+          $client = @(Get-ChildItem (Join-Path $buildDir "bin") -Filter "nesk-drive.exe" -Recurse -ErrorAction SilentlyContinue)
+          if ($client.Count -eq 0) {
+            $found = @(Get-ChildItem (Join-Path $buildDir "bin") -Filter "*.exe" -ErrorAction SilentlyContinue)
+            throw "The build produced no nesk-drive.exe, so the branding did not apply. Found: $($found.Name -join ', ')"
           }
-          Write-Output "Installer: $($branded.Name -join ', ')"
+          Write-Output "Branded executable: $($client[0].FullName)"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
