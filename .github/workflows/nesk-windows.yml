@@ -35,6 +35,12 @@ jobs:
     env:
       CRAFT_TARGET: windows-cl-msvc2022-x86_64
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # The Craft blueprint does not read branding/OEM.cmake: it takes the product identity from
+      # these variables and otherwise falls back to "owncloud". Getting this wrong is not cosmetic,
+      # the packager keeps only bin/<ApplicationExecutable> and filters every other executable out,
+      # so the installer would ship without the client at all.
+      APPLICATION_EXECUTABLE: nesk-drive
+      APPLICATION_SHORTNAME: nesk-drive
 
     steps:
       - name: Check out latest commit
@@ -108,6 +114,35 @@ jobs:
         run: |
           & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --test --options '[Compile]Jobs=1' owncloud/owncloud-client
 
+      - name: Give the packager the product identity
+        run: |
+          # ApplicationExecutable and ApplicationShortname cover the file names, but the blueprint
+          # also carries three literals that no variable can reach: the shortcut name, its
+          # description and the publisher shown in Add/Remove Programs. Patch them here rather than
+          # forking the blueprint, and fail loudly if upstream changes them, so this never silently
+          # degrades back to ownCloud branding.
+          $blueprint = Get-ChildItem "D:\craft" -Recurse -Filter "owncloud-client.py" -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match "craft-blueprints-owncloud" } | Select-Object -First 1
+          if (-not $blueprint) {
+            throw "Could not find the owncloud-client blueprint to brand"
+          }
+          Write-Output "Blueprint: $($blueprint.FullName)"
+
+          $content = Get-Content $blueprint.FullName -Raw
+          $replacements = @(
+            @{ old = 'self.description = "ownCloud Desktop Client"'; new = 'self.description = "Nesk Drive"' },
+            @{ old = 'self.displayName = "ownCloud"'; new = 'self.displayName = "Nesk Drive"' },
+            @{ old = 'self.defines["company"] = "ownCloud GmbH"'; new = 'self.defines["company"] = "Neskapp"' }
+          )
+          foreach ($r in $replacements) {
+            if (-not $content.Contains($r.old)) {
+              throw "Blueprint no longer contains: $($r.old). Review the upstream blueprint before shipping."
+            }
+            $content = $content.Replace($r.old, $r.new)
+          }
+          Set-Content -Path $blueprint.FullName -Value $content -NoNewline
+          Write-Output "Applied $($replacements.Count) branding replacements"
+
       - name: Make the branded icon visible to the installer script
         run: |
           # The upstream Craft blueprint generates an NSIS script that hardcodes src/gui/owncloud.ico,
@@ -179,6 +214,26 @@ jobs:
             throw "The build produced no nesk-drive.exe, so the branding did not apply. Found: $($found.Name -join ', ')"
           }
           Write-Output "Branded executable: $($client[0].FullName)"
+
+          # Building the client is not enough: the packager filters executables by name, and a
+          # mismatch there produced an installer with no client in it at all. Verify the payload we
+          # are about to publish actually carries it.
+          $archive = @(Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" -Filter "*.7z" -ErrorAction SilentlyContinue)
+          if ($archive.Count -eq 0) {
+            throw "No package archive was produced"
+          }
+          $sevenZip = Get-ChildItem "D:\craft" -Recurse -Filter "7za.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $sevenZip) {
+            throw "Could not find 7za.exe to inspect the package"
+          }
+          $listing = & $sevenZip.FullName l $archive[0].FullName
+          $executables = @($listing | Select-String -Pattern "\.exe$" -AllMatches)
+          Write-Output "Executables in the package:"
+          $executables | ForEach-Object { Write-Output "  $_" }
+          if (-not ($listing | Select-String -Pattern "nesk-drive\.exe" -Quiet)) {
+            throw "The package contains no nesk-drive.exe: the installer would have nothing to launch"
+          }
+          Write-Output "The package carries the client executable"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
