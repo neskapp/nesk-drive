@@ -108,6 +108,27 @@ jobs:
         run: |
           & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --test --options '[Compile]Jobs=1' owncloud/owncloud-client
 
+      - name: Make the branded icon visible to the installer script
+        run: |
+          # The upstream Craft blueprint generates an NSIS script that hardcodes src/gui/owncloud.ico,
+          # while ecm_add_app_icon names the icon after APPLICATION_ICON_NAME, so a branded build
+          # produces nesk-drive.ico and packaging aborts. Copy rather than rename, so anything else
+          # looking for the branded name still finds it.
+          $buildDir = (& "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --get buildDir -q owncloud-client | Where-Object { $_ -and $_.Trim() } | Select-Object -Last 1).Trim()
+          Write-Output "Build directory: $buildDir"
+          $guiDir = Join-Path $buildDir "src/gui"
+          $expected = Join-Path $guiDir "owncloud.ico"
+          if (Test-Path $expected) {
+            Write-Output "owncloud.ico is already present, nothing to do"
+          } else {
+            $icons = @(Get-ChildItem $guiDir -Filter "*.ico" -ErrorAction SilentlyContinue)
+            if ($icons.Count -eq 0) {
+              throw "No .ico was produced in $guiDir, the branded icon sources are probably missing"
+            }
+            Copy-Item $icons[0].FullName $expected
+            Write-Output "Copied $($icons[0].Name) to owncloud.ico for the installer script"
+          }
+
       - name: Package
         run: |
           & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --package owncloud/owncloud-client
