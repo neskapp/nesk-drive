@@ -80,6 +80,14 @@ if (WITH_AUTO_UPDATER)
     owncloud_add_test(Updater)
 endif()
 
+# Deliberately outside the WITH_AUTO_UPDATER guard: what protects the update channel is
+# cryptography, and it has to be verified on every platform we build on, including those
+# that ship without the updater.
+find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+owncloud_add_test(UpdateSignature ../src/gui/updater/updatesignature.cpp)
+# plain signature, to match the one owncloud_add_test already used on this target
+target_link_libraries(UpdateSignatureTest OpenSSL::Crypto)
+
 owncloud_add_test(FolderWatcher)
 
 if( UNIX AND NOT APPLE )
