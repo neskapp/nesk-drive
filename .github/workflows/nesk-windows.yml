@@ -27,7 +27,10 @@ jobs:
     name: windows-cl-x86_64
     permissions:
       contents: read
-    runs-on: windows-latest
+    # Pinned rather than windows-latest: that label now resolves to an image where Craft cannot
+    # find the Visual Studio 2022 toolchain its msvc2022 target expects, which breaks the upstream
+    # workflow too. Revisit when the Craft target moves to a newer compiler.
+    runs-on: windows-2022
 
     env:
       CRAFT_TARGET: windows-cl-msvc2022-x86_64
@@ -46,6 +49,20 @@ jobs:
         with:
           path: ~/cache
           key: ${{ runner.os }}-windows-cl-msvc2022-x86_64
+
+      - name: Report the available Visual Studio toolchains
+        # Craft aborts with a bare "Unable to locate Visual Studio" when the runner image does not
+        # carry the expected compiler. Listing what is actually installed turns that into a
+        # diagnosable failure instead of a guessing game.
+        continue-on-error: true
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (Test-Path $vswhere) {
+            & $vswhere -products * -format value -property catalog_productDisplayVersion
+            & $vswhere -products * -format value -property installationPath
+          } else {
+            Write-Output "vswhere.exe not found on this image"
+          }
 
       - name: Clone CraftMaster
         run: git clone --depth=1 https://invent.kde.org/kde/craftmaster.git "$env:HOME/craft/CraftMaster/CraftMaster"
