@@ -171,6 +171,18 @@ jobs:
       - name: Prepare artifacts
         run: |
           Copy-Item "$env:HOME/craft/binaries/*" "${env:GITHUB_WORKSPACE}/binaries/" -ErrorAction SilentlyContinue
+
+          # Craft names its output after the blueprint and the branch, so the installer reads as an
+          # ownCloud build. Rename to the product, keeping "unsigned" explicit until the release is
+          # signed. The .sha256 files hold the digest alone, so renaming does not invalidate them.
+          $version = (Select-String -Path "${env:GITHUB_WORKSPACE}/VERSION.cmake" -Pattern 'MIRALL_VERSION_(MAJOR|MINOR|PATCH)\s+(\d+)' |
+            ForEach-Object { $_.Matches[0].Groups[2].Value }) -join '.'
+          if (-not $version) { throw "Could not read the product version from VERSION.cmake" }
+          Write-Output "Product version: $version"
+          foreach ($file in Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" -File) {
+            $suffix = $file.Name -replace '^.*?(\.[^.]+(\.sha256)?)$', '$1'
+            Rename-Item $file.FullName (Join-Path $file.DirectoryName "NeskDrive-$version-x64-unsigned$suffix")
+          }
           # Craft records the configure arguments, OIDC registration included, in its package
           # manifest. That file has no value for whoever installs the client and must never be
           # published: it would put the client secret in plain text in a downloadable artifact.
