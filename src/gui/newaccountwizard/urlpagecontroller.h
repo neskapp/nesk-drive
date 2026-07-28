@@ -73,6 +73,13 @@ public:
      */
     bool validate() override;
 
+    /**
+     * @brief isServerUrlFixed tells whether the server is imposed by the branding or the system
+     * configuration. When it is, the user cannot edit the address and the wizard skips this page
+     * entirely: validation is then driven by the wizard controller.
+     */
+    bool isServerUrlFixed() const;
+
     // ideally we should have a QRegExValidator on the url line edit and only when that passes,
     // the wizard will enable the next button. The url evaluation may still fail but "next" should not be enabled on an
     // obviously bogus url. this is future as a final polishing step.
@@ -101,6 +108,7 @@ private:
 
     UrlPageResults _results;
     bool _urlValidated = false;
+    bool _serverUrlFixed = false;
 
     /** sets up the wizard page with appropriate content and connect any signals to eg the url QLineEdit */
     void buildPage();

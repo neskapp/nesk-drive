@@ -56,6 +56,8 @@ protected Q_SLOTS:
 
     // slots for handling signals from the page controllers:
     void onUrlValidationCompleted(const OCC::UrlPageResults &result);
+    // in the fixed server flow there is no visible url page to display the error on, so the wizard reports it
+    void onUrlValidationFailed(const OCC::UrlPageResults &result);
 
     void onOAuthValidationCompleted(const OCC::OAuthPageResults &results);
     // we need to raise the gui when oauth validation fails
@@ -83,6 +85,9 @@ private:
     /** connects the model signals to local slots, as needed */
     void connectModel();
 
+    /** in the fixed server flow, runs the discovery of the branded server without showing a url page */
+    void startFixedServerValidation();
+
     /** updates the QPalette of the wizard to use the theme colors, if they are valid */
     void updateColors();
 
@@ -97,6 +102,11 @@ private:
     // this is the only controller we need to explicitly keep our eye on as we need to give it values to start the oauth step
     OAuthPageController *_oauthController = nullptr;
     bool _autoValidateOAuthPage = false;
+
+    // when the theme pins the server, the url controller still exists but its page is kept out of the
+    // wizard: the user never sees, nor reaches, a server selection
+    UrlPageController *_urlController = nullptr;
+    bool _fixedServerFlow = false;
 
     QHash<int, QList<QWizard::WizardButton>> _buttonLayouts;
 

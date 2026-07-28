@@ -24,9 +24,33 @@ owncloud_add_test(ExcludedFiles)
 owncloud_add_test(Utility)
 owncloud_add_test(AppConfig ../src/libsync/owncloudtheme.cpp)
 
-# Nesk Drive branding test: only meaningful when the Nesk OEM theme is compiled in.
+# Nesk Drive branding and fixed-server tests: only meaningful when the Nesk OEM theme is compiled in.
 if(APPLICATION_SHORTNAME STREQUAL "nesk-drive")
     owncloud_add_test(NeskTheme)
+    # the wizard classes are not exported from owncloudGui, so the test compiles them in,
+    # together with the network adapters and the oauth machinery they pull along
+    owncloud_add_test(NewAccountWizard
+        ../src/gui/newaccountwizard/advancedsettingspagecontroller.cpp
+        ../src/gui/newaccountwizard/authsuccesspagecontroller.cpp
+        ../src/gui/newaccountwizard/newaccountenums.h
+        ../src/gui/newaccountwizard/newaccountmodel.cpp
+        ../src/gui/newaccountwizard/newaccountwizard.cpp
+        ../src/gui/newaccountwizard/newaccountwizardcontroller.cpp
+        ../src/gui/newaccountwizard/oauthpagecontroller.cpp
+        ../src/gui/newaccountwizard/urlpagecontroller.cpp
+        ../src/gui/networkadapters/determineauthtypeadapter.cpp
+        ../src/gui/networkadapters/discoverwebfingerserviceadapter.cpp
+        ../src/gui/networkadapters/fetchcapabilitiesadapter.cpp
+        ../src/gui/networkadapters/resolveurladapter.cpp
+        ../src/gui/networkadapters/userinfoadapter.cpp
+        ../src/gui/networkadapters/webfingerlookupadapter.cpp
+        ../src/gui/creds/oauth.cpp
+        ../src/gui/creds/oauthhtmlpage.cpp
+        ../src/gui/tlserrordialog.cpp
+        ../src/gui/tlserrordialog.ui
+    )
+    # tlserrordialog.cpp includes its generated ui header, which needs uic on this target too
+    set_target_properties(NewAccountWizardTest PROPERTIES AUTOUIC ON)
 endif()
 
 owncloud_add_test(SyncEngine)

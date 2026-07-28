@@ -19,3 +19,14 @@ set( THEME_INCLUDE          "${OEM_THEME_DIR}/nesktheme.h" )
 
 # Nesk Drive ships without any crash reporter or telemetry (see PRIVACY.md).
 option( WITH_CRASHREPORTER "Build crashreporter" OFF )
+
+# OIDC registration of Nesk Drive on the Nesk identity provider.
+#
+# A native application is a public client: these values are not a secret in the usual sense,
+# and the security of the flow rests on PKCE, exact loopback redirects, short lived access
+# tokens and server side revocation. They are still injected at build time rather than stored
+# here, so that rotating the registration never requires a public commit and the history does
+# not accumulate stale credentials. Release builds pass them on the CMake command line.
+# The defaults below are development placeholders: the identity provider rejects them.
+set( NESK_OAUTH_CLIENT_ID "nesk-drive-dev-placeholder" CACHE STRING "OIDC client id of the Nesk Drive registration" )
+set( NESK_OAUTH_CLIENT_SECRET "nesk-drive-dev-placeholder-secret" CACHE STRING "OIDC client secret of the Nesk Drive registration" )

@@ -14,6 +14,7 @@
 
 #include "accountmanager.h"
 #include "account.h"
+#include "config/serverurlpolicy.h"
 #include "configfile.h"
 #include "creds/credentialmanager.h"
 #include "creds/credentials.h"
@@ -239,6 +240,14 @@ Account *AccountManager::loadAccountHelper(QSettings &settings)
         return nullptr;
     }
     QUrl url = urlConfig.toUrl();
+
+    // the account file is user writable: a branded build must not be talked into syncing with
+    // another server by an edited configuration
+    const ServerUrlPolicy policy = ServerUrlPolicy::fromTheme();
+    if (!policy.isServerUrlAllowed(url)) {
+        qCWarning(lcAccountManager) << "Ignoring account for" << url << "which this build is not allowed to connect to";
+        return nullptr;
+    }
 
     QVariantMap capsValue = settings.value(capabilitesC()).value<QVariantMap>();
     Capabilities caps(url, capsValue);

@@ -128,6 +128,10 @@ class AccountConnectionWizard:
 
     @staticmethod
     def add_server(server_url):
+        # A branded build such as Nesk Drive pins the server: the wizard has no address page and
+        # starts the browser sign in on its own, so there is nothing to type and nothing to confirm.
+        if not object.exists(AccountConnectionWizard.SERVER_ADDRESS_BOX):
+            return
         squish.mouseClick(
             squish.waitForObject(AccountConnectionWizard.SERVER_ADDRESS_BOX)
         )

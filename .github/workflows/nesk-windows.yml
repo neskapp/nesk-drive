@@ -1,0 +1,138 @@
+# Windows build of the Nesk Drive client.
+#
+# Derived from the upstream main.yml, restricted to the Windows target and carrying the two
+# differences a branded build needs: the OIDC registration is injected at configure time rather
+# than stored in the source tree, and the installer identity is checked before publishing.
+name: Nesk Drive (Windows)
+
+on:
+  push:
+    branches:
+      - 'nesk/**'
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: nesk-windows-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  build:
+    name: windows-cl-x86_64
+    permissions:
+      contents: read
+    # Pinned rather than windows-latest: that label now resolves to an image where Craft cannot
+    # find the Visual Studio 2022 toolchain its msvc2022 target expects, which breaks the upstream
+    # workflow too. Revisit when the Craft target moves to a newer compiler.
+    runs-on: windows-2022
+
+    env:
+      CRAFT_TARGET: windows-cl-msvc2022-x86_64
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Check out latest commit
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+
+      - name: Restore cache
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/cache
+          key: ${{ runner.os }}-windows-cl-msvc2022-x86_64
+
+      - name: Report the available Visual Studio toolchains
+        # Craft aborts with a bare "Unable to locate Visual Studio" when the runner image does not
+        # carry the expected compiler. Listing what is actually installed turns that into a
+        # diagnosable failure instead of a guessing game.
+        continue-on-error: true
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (Test-Path $vswhere) {
+            & $vswhere -products * -format value -property catalog_productDisplayVersion
+            & $vswhere -products * -format value -property installationPath
+          } else {
+            Write-Output "vswhere.exe not found on this image"
+          }
+
+      - name: Clone CraftMaster
+        run: git clone --depth=1 https://invent.kde.org/kde/craftmaster.git "$env:HOME/craft/CraftMaster/CraftMaster"
+
+      - name: Craft setup
+        run: |
+          New-Item -Path ~/cache -ItemType Directory -ErrorAction SilentlyContinue
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" --setup
+
+      - name: Craft unshelve
+        run: |
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --unshelve "${env:GITHUB_WORKSPACE}/.craft.shelf"
+
+      - name: Prepare
+        run: |
+          New-Item -ItemType Directory "${env:GITHUB_WORKSPACE}/binaries/"
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --set forceAsserts=true owncloud/owncloud-client
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --set srcDir="${env:GITHUB_WORKSPACE}" owncloud/owncloud-client
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c dev-utils/nsis
+
+      - name: Install dependencies
+        run: |
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --install-deps owncloud/owncloud-client
+
+      - name: Build
+        env:
+          NESK_CLIENT_ID: ${{ secrets.NESK_OIDC_CLIENT_ID }}
+          NESK_CLIENT_SECRET: ${{ secrets.NESK_OIDC_CLIENT_SECRET }}
+        run: |
+          # The OIDC registration is passed to CMake here instead of living in the public source.
+          # When the secrets are missing (a pull request from a fork, or before they are configured)
+          # the build falls back to the development placeholders of branding/OEM.cmake: the client
+          # then builds and installs normally but cannot sign in, which is the safe outcome.
+          $clientId = if ($env:NESK_CLIENT_ID) { $env:NESK_CLIENT_ID } else { "nesk-drive-dev-placeholder" }
+          $clientSecret = if ($env:NESK_CLIENT_SECRET) { $env:NESK_CLIENT_SECRET } else { "nesk-drive-dev-placeholder-secret" }
+          if (-not $env:NESK_CLIENT_ID) {
+            Write-Output "::warning::No OIDC registration configured, building with development placeholders: sign in will fail."
+          }
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --set args="-DNESK_OAUTH_CLIENT_ID=$clientId -DNESK_OAUTH_CLIENT_SECRET=$clientSecret" owncloud/owncloud-client
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache owncloud/owncloud-client
+
+      - name: Run tests
+        run: |
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --test --options '[Compile]Jobs=1' owncloud/owncloud-client
+
+      - name: Package
+        run: |
+          & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --package owncloud/owncloud-client
+
+      - name: Prepare artifacts
+        run: |
+          Copy-Item "$env:HOME/craft/binaries/*" "${env:GITHUB_WORKSPACE}/binaries/" -ErrorAction SilentlyContinue
+          Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" | Format-Table Name, Length
+
+      - name: Check the installer identity
+        run: |
+          # The branding must survive packaging: an installer still named after the upstream product
+          # would mean the OEM theme was not picked up by this build.
+          $installers = @(Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" -Filter "*.exe" -ErrorAction SilentlyContinue)
+          if ($installers.Count -eq 0) {
+            throw "No Windows installer was produced"
+          }
+          $branded = @($installers | Where-Object { $_.Name -match "(?i)nesk" })
+          if ($branded.Count -eq 0) {
+            throw "No installer carries the Nesk branding, found: $($installers.Name -join ', ')"
+          }
+          Write-Output "Installer: $($branded.Name -join ', ')"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: nesk-drive-windows-unsigned
+          path: ${{ github.workspace }}/binaries/*

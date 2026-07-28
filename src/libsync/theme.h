@@ -193,10 +193,22 @@ public:
     Q_DECL_DEPRECATED_X("Use overrideServerUrlV2")
     virtual QString overrideServerUrl() const;
 
-    /** Same as overrideServerUrl allows override by
-     *  setting $OWNCLOUD_OVERRIDE_SERVER_URL
+    /** Same as overrideServerUrl, allows override by setting
+     *  $OWNCLOUD_OVERRIDE_SERVER_URL as long as the theme does not pin a server
+     *  itself. A branded single service build is a hard constraint and must not
+     *  be relaxed by the environment it runs in.
      */
     QString overrideServerUrlV2() const;
+
+    /**
+     * The only OpenID Connect issuer this build may trust, empty by default.
+     *
+     * When set, the issuer advertised by the discovery document and the OAuth
+     * endpoints derived from it are pinned to this URL. This is independent from
+     * overrideServerUrl: the identity provider may live on another host than the
+     * service itself.
+     */
+    virtual QString oidcIssuerUrl() const;
 
     /**
      * If set to a non-empty string, the path part of the URL will be overwritten with this path.
