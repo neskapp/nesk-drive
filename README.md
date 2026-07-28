@@ -39,7 +39,10 @@ provide the corresponding source code and retain the required license,
 copyright, and warranty notices. The complete source for Nesk releases is
 available from this repository and its release tags.
 
-Release-signing controls are described in [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
+Release-signing controls are described in [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md),
+and the signing procedure in [docs/release/windows-signing.md](docs/release/windows-signing.md).
+Windows builds are currently **unsigned**: Windows reports an unknown publisher
+until a certificate is in place.
 Product naming and identifiers are described in [BRANDING.md](BRANDING.md).
 
 ## Building from source
