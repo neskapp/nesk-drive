@@ -15,6 +15,7 @@
 #pragma once
 
 #include "common/depreaction.h"
+#include "config.h"
 #include "theme.h"
 
 #include <QColor>
@@ -61,10 +62,12 @@ public:
     // credentials are public by nature: security relies on PKCE, exact
     // loopback redirects, short access-token lifetime and server-side
     // revocation, never on the confidentiality of these values.
-    // TODO(nesk): replace the placeholders with the production registration
-    // before the first signed build (tracked, must not ship as-is).
-    QString oauthClientId() const override { return QStringLiteral("nesk-drive-dev-placeholder"); }
-    QString oauthClientSecret() const override { return QStringLiteral("nesk-drive-dev-placeholder-secret"); }
+    // They are injected at configure time (NESK_OAUTH_CLIENT_ID and
+    // NESK_OAUTH_CLIENT_SECRET, see branding/OEM.cmake), so rotating the
+    // registration never requires a commit. Without injection the build falls
+    // back to development placeholders, which the provider rejects.
+    QString oauthClientId() const override { return QStringLiteral(NESK_OAUTH_CLIENT_ID); }
+    QString oauthClientSecret() const override { return QStringLiteral(NESK_OAUTH_CLIENT_SECRET); }
 
     // A random loopback port, as registered on the IdP side.
     QVector<quint16> oauthPorts() const override { return {0}; }
