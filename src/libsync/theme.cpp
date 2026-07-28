@@ -214,13 +214,20 @@ QString Theme::overrideServerUrl() const
 
 QString Theme::overrideServerUrlV2() const
 {
-    static const auto serverOverride = qEnvironmentVariable("OWNCLOUD_OVERRIDE_SERVER_URL");
-    if (serverOverride.isEmpty()) {
-        OC_DISABLE_DEPRECATED_WARNING
-        return overrideServerUrl();
-        OC_ENABLE_DEPRECATED_WARNING
+    OC_DISABLE_DEPRECATED_WARNING
+    const auto themeOverride = overrideServerUrl();
+    OC_ENABLE_DEPRECATED_WARNING
+    // a theme that pins a server defines the product itself: the environment must not be able to
+    // point a branded build at another service
+    if (!themeOverride.isEmpty()) {
+        return themeOverride;
     }
-    return serverOverride;
+    return qEnvironmentVariable("OWNCLOUD_OVERRIDE_SERVER_URL");
+}
+
+QString Theme::oidcIssuerUrl() const
+{
+    return QString();
 }
 
 QString Theme::overrideServerPath() const

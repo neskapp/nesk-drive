@@ -39,11 +39,16 @@ public:
     QString appNameGUI() const override { return QStringLiteral("Nesk Drive"); }
 
     // The service endpoint is fixed; the account wizard must never offer a
-    // server selection. Enforcement of the URL at every entry point is done
-    // in the new-account wizard controllers.
+    // server selection. Enforcement of the URL at every entry point goes
+    // through ServerUrlPolicy (see libsync/config/serverurlpolicy.h).
     OC_DISABLE_DEPRECATED_WARNING
     QString overrideServerUrl() const override { return QStringLiteral("https://files.nesk.ch"); }
     OC_ENABLE_DEPRECATED_WARNING
+
+    // The identity provider is the Nesk platform itself, not the file service.
+    // Discovery is served by files.nesk.ch but must announce exactly this issuer,
+    // and every OAuth endpoint has to live below it.
+    QString oidcIssuerUrl() const override { return QStringLiteral("https://nesk.ch/oidc"); }
 
     bool allowSystemConfigOverrides() const override { return false; }
 

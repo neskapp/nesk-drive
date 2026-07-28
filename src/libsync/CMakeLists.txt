@@ -54,6 +54,7 @@ set(libsync_SRCS
     appprovider.cpp
     config/appconfig.cpp
     config/openidconfig.cpp
+    config/serverurlpolicy.cpp
 )
 
 if(WIN32)

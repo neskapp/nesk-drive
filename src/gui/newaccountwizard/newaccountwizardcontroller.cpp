@@ -27,6 +27,8 @@
 #include "urlpagecontroller.h"
 
 #include <QAbstractButton>
+#include <QMessageBox>
+#include <QTimer>
 
 namespace OCC {
 
@@ -40,6 +42,12 @@ NewAccountWizardController::NewAccountWizardController(NewAccountModel *model, N
     buildPages();
     buildButtonLayouts();
     connectWizard();
+
+    if (_fixedServerFlow) {
+        // validate() is synchronous and would block before the wizard is on screen, so let the event
+        // loop start first. The connection to this also cancels the call if the wizard goes away.
+        QTimer::singleShot(0, this, &NewAccountWizardController::startFixedServerValidation);
+    }
 }
 
 void NewAccountWizardController::setupWizard()
@@ -73,9 +81,18 @@ void NewAccountWizardController::buildPages()
         return;
 
     QWizardPage *urlPage = new QWizardPage(_wizard);
-    UrlPageController *urlController = new UrlPageController(urlPage, _accessManager, this);
-    connect(urlController, &UrlPageController::success, this, &NewAccountWizardController::onUrlValidationCompleted);
-    _urlPageIndex = _wizard->addPage(urlPage, urlController);
+    _urlController = new UrlPageController(urlPage, _accessManager, this);
+    connect(_urlController, &UrlPageController::success, this, &NewAccountWizardController::onUrlValidationCompleted);
+    connect(_urlController, &UrlPageController::failure, this, &NewAccountWizardController::onUrlValidationFailed);
+
+    _fixedServerFlow = _urlController->isServerUrlFixed();
+    if (_fixedServerFlow) {
+        // the server is imposed by the branding: the page is built (it holds the url and drives the
+        // validation) but never joins the visible page stack, so no server selection is reachable
+        urlPage->setVisible(false);
+    } else {
+        _urlPageIndex = _wizard->addPage(urlPage, _urlController);
+    }
 
     QWizardPage *oauthPage = new QWizardPage(_wizard);
     _oauthController = new OAuthPageController(oauthPage, _accessManager, this);
@@ -104,8 +121,10 @@ void NewAccountWizardController::buildButtonLayouts()
     if (_wizard == nullptr)
         return;
     if (Utility::isMac()) {
-        _buttonLayouts.insert(
-            _urlPageIndex, QList<QWizard::WizardButton>{QWizard::Stretch, QWizard::WizardButton::CancelButton, QWizard::WizardButton::NextButton});
+        if (_urlPageIndex > -1) {
+            _buttonLayouts.insert(
+                _urlPageIndex, QList<QWizard::WizardButton>{QWizard::Stretch, QWizard::WizardButton::CancelButton, QWizard::WizardButton::NextButton});
+        }
         _buttonLayouts.insert(_oauthPageIndex,
             QList<QWizard::WizardButton>{
                 QWizard::WizardButton::BackButton, QWizard::Stretch, QWizard::WizardButton::CancelButton, QWizard::WizardButton::NextButton});
@@ -116,8 +135,10 @@ void NewAccountWizardController::buildButtonLayouts()
             QList<QWizard::WizardButton>{
                 QWizard::WizardButton::BackButton, QWizard::Stretch, QWizard::WizardButton::CancelButton, QWizard::WizardButton::FinishButton});
     } else {
-        _buttonLayouts.insert(
-            _urlPageIndex, QList<QWizard::WizardButton>{QWizard::Stretch, QWizard::WizardButton::NextButton, QWizard::WizardButton::CancelButton});
+        if (_urlPageIndex > -1) {
+            _buttonLayouts.insert(
+                _urlPageIndex, QList<QWizard::WizardButton>{QWizard::Stretch, QWizard::WizardButton::NextButton, QWizard::WizardButton::CancelButton});
+        }
         _buttonLayouts.insert(_oauthPageIndex,
             QList<QWizard::WizardButton>{
                 QWizard::WizardButton::BackButton, QWizard::Stretch, QWizard::WizardButton::NextButton, QWizard::WizardButton::CancelButton});
@@ -163,6 +184,34 @@ void NewAccountWizardController::onUrlValidationCompleted(const OCC::UrlPageResu
     // it already succeeded!
     // so we just set a flag to auto-validate the oauth page and handle that when we are notified that the page actually changed -> see onPageChanged
     _autoValidateOAuthPage = true;
+
+    if (_fixedServerFlow) {
+        // there is no url page to leave here: the oauth page is already the current one, so no page
+        // change will ever come to trigger the validation for us
+        _autoValidateOAuthPage = false;
+        _wizard->validateCurrentPage();
+    }
+}
+
+void NewAccountWizardController::onUrlValidationFailed(const OCC::UrlPageResults &result)
+{
+    if (!_wizard)
+        return;
+    if (!_fixedServerFlow) {
+        // the url page is visible and already shows the error itself
+        return;
+    }
+    // the branded server could not be reached or did not pass the policy: there is no server field to
+    // correct, so the only honest outcome is to tell the user and let them retry later
+    QMessageBox::warning(_wizard, Theme::instance()->appNameGUI(),
+        result.error.isEmpty() ? tr("The service is unavailable. Please try again later.") : result.error);
+}
+
+void NewAccountWizardController::startFixedServerValidation()
+{
+    if (!_urlController || !_wizard)
+        return;
+    _urlController->validate();
 }
 
 void NewAccountWizardController::onOAuthValidationCompleted(const OCC::OAuthPageResults &results)

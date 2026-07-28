@@ -15,6 +15,7 @@
 
 #include "accessmanager.h"
 #include "config/appconfig.h"
+#include "config/serverurlpolicy.h"
 #include "networkadapters/determineauthtypeadapter.h"
 #include "networkadapters/discoverwebfingerserviceadapter.h"
 #include "networkadapters/resolveurladapter.h"
@@ -48,11 +49,16 @@ UrlPageController::UrlPageController(QWizardPage *page, AccessManager *accessMan
     setUrl(serverUrl);
 
     // The system admin provides the url, don't let the user change it!
-    bool allowServerUrlChange = systemConfig.allowServerUrlChange();
-    if (!allowServerUrlChange) {
+    _serverUrlFixed = !systemConfig.allowServerUrlChange();
+    if (_serverUrlFixed) {
         _urlField->setEnabled(false);
         _instructionLabel->setText(tr("Your web browser will be opened to complete sign in."));
     }
+}
+
+bool UrlPageController::isServerUrlFixed() const
+{
+    return _serverUrlFixed;
 }
 
 void UrlPageController::buildPage()
@@ -215,6 +221,13 @@ bool UrlPageController::validate()
         return false;
     }
 
+    // a branded build talks to one service only: whatever the url came from, it has to be that one
+    const ServerUrlPolicy policy = ServerUrlPolicy::fromTheme();
+    if (!policy.isServerUrlAllowed(givenUrl)) {
+        handleError(policy.rejectionMessage());
+        return false;
+    }
+
     setUrl(givenUrl.toDisplayString());
 
     DiscoverWebFingerServiceAdapter webfingerServiceAdapter(_accessManager, givenUrl);
@@ -222,8 +235,14 @@ bool UrlPageController::validate()
 
     // in case any kind of error occurs, we assume the WebFinger service is not available
     if (webfingerServiceResult.success()) {
+        const QUrl webfingerServiceUrl(webfingerServiceResult.href);
+        // the server chooses this url, so it is an untrusted input as far as the policy is concerned
+        if (!policy.isAuthenticationUrlAllowed(webfingerServiceUrl)) {
+            handleError(policy.rejectionMessage());
+            return false;
+        }
         _results.baseServerUrl = givenUrl;
-        _results.webfingerServiceUrl = QUrl(webfingerServiceResult.href);
+        _results.webfingerServiceUrl = webfingerServiceUrl;
     } else {
         // first, we must resolve the actual server URL
         // note we have to pass the wizard dialog to the adapter to parent the tlsErrorDialog
@@ -241,6 +260,12 @@ bool UrlPageController::validate()
         if (finalUrl.hasQuery()) {
             QString errorMsg = tr("The requested URL failed with query value: %1").arg(finalUrl.query());
             handleError(errorMsg);
+            return false;
+        }
+
+        // redirections must not be able to move a branded build to another host
+        if (!policy.isServerUrlAllowed(finalUrl)) {
+            handleError(policy.rejectionMessage());
             return false;
         }
 

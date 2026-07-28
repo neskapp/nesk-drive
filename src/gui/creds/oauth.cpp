@@ -20,6 +20,7 @@
 #include "libsync/creds/credentialmanager.h"
 #include "networkjobs/checkserverjobfactory.h"
 #include "oauthhtmlpage.h"
+#include "config/serverurlpolicy.h"
 #include "theme.h"
 
 #include <QDesktopServices>
@@ -422,6 +423,27 @@ void OAuth::fetchWellKnown()
             }
 
             qCDebug(lcOauth) << "parsing .well-known reply successful, auth endpoint" << _authEndpoint << "and token endpoint" << _tokenEndpoint;
+
+            // A branded build trusts exactly one identity provider. The discovery document comes from
+            // the service, so it is an untrusted input: a tampered one must not be able to send the
+            // user to another authorization server. authorisationLink() refuses to build a link
+            // without a valid endpoint, so clearing them here stops the flow.
+            // The pinning applies to the branded service only: reaching this code with another server
+            // means the wizard and the account loader were bypassed, and both already refuse such an
+            // account. It also keeps the upstream tests, which talk to a fake provider, meaningful.
+            const ServerUrlPolicy policy = ServerUrlPolicy::fromTheme();
+            if (policy.isEnforced() && !policy.pinnedIssuerUrl().isEmpty() && policy.isAuthenticationUrlAllowed(_serverUrl)) {
+                const QUrl issuer = QUrl::fromEncoded(data[QStringLiteral("issuer")].toString().toUtf8());
+                if (!policy.isIssuerAllowed(issuer)) {
+                    qCWarning(lcOauth) << "refusing .well-known reply announcing issuer" << issuer << "instead of" << policy.pinnedIssuerUrl();
+                    _authEndpoint.clear();
+                    _tokenEndpoint.clear();
+                } else if (!policy.isEndpointAllowed(_authEndpoint) || !policy.isEndpointAllowed(_tokenEndpoint)) {
+                    qCWarning(lcOauth) << "refusing OAuth endpoints outside of the pinned issuer" << policy.pinnedIssuerUrl();
+                    _authEndpoint.clear();
+                    _tokenEndpoint.clear();
+                }
+            }
         } else if (err.error == QJsonParseError::IllegalValue) {
             qCDebug(lcOauth) << "failed to parse .well-known reply as JSON, server might not support OIDC";
         } else {
