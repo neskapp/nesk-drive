@@ -9,7 +9,7 @@ installers, executables, and update payloads. A release may be signed only
 from a reviewed commit after every gate in this policy is configured and
 verified.
 
-## Ownership and independent roles
+## Ownership and roles
 
 The repository is owned by the [`neskapp`](https://github.com/neskapp)
 organization. Release responsibilities are assigned through these stable
@@ -19,22 +19,27 @@ GitHub teams:
 - [Nesk Drive reviewers](https://github.com/orgs/neskapp/teams/nesk-drive-reviewers)
 - [Nesk Drive signing approvers](https://github.com/orgs/neskapp/teams/nesk-drive-signing-approvers)
 
-Every person assigned to a release role must use two-factor authentication.
-The author of a release change cannot supply its independent review or approve
-its signing request. Release and signing activity remains blocked until the
-reviewer and signing-approver teams each contain a qualified independent
-member and their access and two-factor authentication are verified.
+**Nesk Drive is currently maintained by one person, who holds all three roles.**
+This is stated plainly rather than left to be inferred from teams that happen to
+hold a single member: no independent review and no four-eyes approval take place
+today, and this document does not claim otherwise.
+
+Every person assigned to a release role must use two-factor authentication for
+both repository and signing access.
+
+Should a second maintainer join, the roles will be separated so that the author
+of a release change no longer reviews it nor approves its signing request, and
+this document will be updated in the same change.
 
 ## Review and signing requirements
 
-- A change proposed by a non-maintainer must arrive by pull request and receive
-  the independent reviewer's approval before merge.
-- Every change to a release branch requires one approval. A change from a
-  non-maintainer requires a pull request review from the independent reviewer
-  before merge.
-- Every signing request requires explicit manual approval by the independent,
-  verified signing approver; no request is implicitly or automatically
-  approved.
+- A change proposed by a non-maintainer must arrive by pull request and be
+  reviewed by a maintainer before merge.
+- Every change to a release branch arrives by pull request and must pass the
+  required CI checks before merge.
+- Every signing request requires explicit manual approval by a signing approver
+  through the protected `signpath` environment; no request is implicitly or
+  automatically approved, and no workflow can sign without a human acting on it.
 - The signing approver must verify the source commit, intended release version,
   generated artifact names, and release channel before approving the request.
 - Signing credentials and the SignPath API token must be restricted to the
