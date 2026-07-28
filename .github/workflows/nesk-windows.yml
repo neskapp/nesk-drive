@@ -172,6 +172,12 @@ jobs:
         run: |
           Copy-Item "$env:HOME/craft/binaries/*" "${env:GITHUB_WORKSPACE}/binaries/" -ErrorAction SilentlyContinue
 
+          # Craft records the configure arguments, OIDC registration included, in its package
+          # manifest. That file has no value for whoever installs the client and must never be
+          # published: it would put the client secret in plain text in a downloadable artifact.
+          # Delete it first: renaming it below would republish it under another name.
+          Remove-Item "${env:GITHUB_WORKSPACE}/binaries/manifest*.json" -Force -ErrorAction SilentlyContinue
+
           # Craft names its output after the blueprint and the branch, so the installer reads as an
           # ownCloud build. Rename to the product, keeping "unsigned" explicit until the release is
           # signed. The .sha256 files hold the digest alone, so renaming does not invalidate them.
@@ -179,14 +185,21 @@ jobs:
             ForEach-Object { $_.Matches[0].Groups[2].Value }) -join '.'
           if (-not $version) { throw "Could not read the product version from VERSION.cmake" }
           Write-Output "Product version: $version"
-          foreach ($file in Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" -File) {
-            $suffix = $file.Name -replace '^.*?(\.[^.]+(\.sha256)?)$', '$1'
-            Rename-Item $file.FullName (Join-Path $file.DirectoryName "NeskDrive-$version-x64-unsigned$suffix")
+          $seen = @{}
+          foreach ($file in @(Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" -File)) {
+            # only the deliverables are renamed, anything else is unexpected and left untouched
+            if ($file.Name -notmatch '\.(exe|7z)(\.sha256)?$') {
+              Write-Output "Leaving $($file.Name) as is"
+              continue
+            }
+            $suffix = $Matches[0]
+            $target = "NeskDrive-$version-x64-unsigned$suffix"
+            if ($seen.ContainsKey($target)) {
+              throw "Two files would be renamed to ${target}: $($seen[$target]) and $($file.Name)"
+            }
+            $seen[$target] = $file.Name
+            Rename-Item $file.FullName (Join-Path $file.DirectoryName $target)
           }
-          # Craft records the configure arguments, OIDC registration included, in its package
-          # manifest. That file has no value for whoever installs the client and must never be
-          # published: it would put the client secret in plain text in a downloadable artifact.
-          Remove-Item "${env:GITHUB_WORKSPACE}/binaries/manifest*.json" -Force -ErrorAction SilentlyContinue
           Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" | Format-Table Name, Length
 
       - name: Make sure no published file leaks the registration
