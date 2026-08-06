@@ -818,8 +818,8 @@ The update will be performed in the background, and overwrite the current AppIma
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
-        <translation>ບໍ່ມີການຕັ້ງຄ່າບັນຊີ ownCloud</translation>
+        <source>No %1 account configured</source>
+        <translation>ບໍ່ມີການຕັ້ງຄ່າບັນຊີ %1</translation>
     </message>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="290"/>

@@ -818,8 +818,8 @@ Përditësimi do të kryhet në prapaskenë dhe do të mbishkruajë kartelën e 
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
-        <translation>Nuk ka llogari ownCloud të formësuar</translation>
+        <source>No %1 account configured</source>
+        <translation>Nuk ka llogari %1 të formësuar</translation>
     </message>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="290"/>

@@ -819,8 +819,8 @@ A atualização será executada em segundo plano e substituirá o arquivo AppIma
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
-        <translation>Nenhuma conta ownCloud configurada</translation>
+        <source>No %1 account configured</source>
+        <translation>Nenhuma conta %1 configurada</translation>
     </message>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="290"/>

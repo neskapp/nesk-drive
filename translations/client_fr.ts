@@ -818,8 +818,8 @@ La mise à jour sera effectuée en arrière-plan et va écraser le fichier Appim
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
-        <translation>Aucun compte ownCloud configuré</translation>
+        <source>No %1 account configured</source>
+        <translation>Aucun compte %1 configuré</translation>
     </message>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="290"/>
@@ -2889,6 +2889,10 @@ Veuillez noter qu’utiliser les options de journalisation en ligne de commande 
 </context>
 <context>
     <name>OCC::Theme</name>
+    <message>
+        <source>&lt;p&gt;Version %1. For more information visit &lt;a href=&quot;%2&quot;&gt;https://%3&lt;/a&gt;&lt;/p&gt;&lt;p&gt;For help, please visit: &lt;a href=&quot;https://nesk.ch/support&quot;&gt;https://nesk.ch/support&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Source code: &lt;a href=&quot;https://github.com/neskapp/nesk-drive&quot;&gt;https://github.com/neskapp/nesk-drive&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;small&gt;By Klaas Freitag, Daniel Molkentin, Olivier Goffart, Markus Götz,  Jan-Christoph Borchardt, Thomas Müller,&lt;br&gt;Dominik Schmidt, Michael Stingl, Hannah von Reth, Fabian Müller and others.&lt;/small&gt;&lt;/p&gt;&lt;p&gt;Copyright ownCloud GmbH (A Kiteworks Company)&lt;/p&gt;&lt;p&gt;Distributed by %4 and licensed under the GNU General Public License (GPL) Version 2.0.&lt;br/&gt;%5 and the %5 logo are trademarks of %4.&lt;/p&gt;&lt;p&gt;&lt;small&gt;%6&lt;/small&gt;&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Version %1. Pour plus d&apos;informations rendez-vous sur &lt;a href=&quot;%2&quot;&gt;https://%3&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Pour obtenir de l&apos;aide, veuillez consulter : &lt;a href=&quot;https://nesk.ch/support&quot;&gt;https://nesk.ch/support&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Code source : &lt;a href=&quot;https://github.com/neskapp/nesk-drive&quot;&gt;https://github.com/neskapp/nesk-drive&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;small&gt;Par Klaas Freitag, Daniel Molkentin, Olivier Goffart, Markus Götz,  Jan-Christoph Borchardt, Thomas Müller,&lt;br&gt;Dominik Schmidt, Michael Stingl, Hannah von Reth, Fabian Müller et d&apos;autres.&lt;/small&gt;&lt;/p&gt;&lt;p&gt;Copyright ownCloud GmbH (Une société Kiteworks)&lt;/p&gt;&lt;p&gt;Distribué par %4 et sous licence GNU General Public License (GPL) Version 2.0.&lt;br/&gt;%5 et le logo %5 sont des marques de %4.&lt;/p&gt;&lt;p&gt;&lt;small&gt;%6&lt;/small&gt;&lt;/p&gt;</translation>
+    </message>
     <message>
         <location filename="../src/libsync/theme.cpp" line="322"/>
         <source>&lt;p&gt;Version %1. For more information visit &lt;a href=&quot;%2&quot;&gt;https://%3&lt;/a&gt;&lt;/p&gt;&lt;p&gt;For known issues and help, please visit: &lt;a href=&quot;https://central.owncloud.com/c/desktop-client&quot;&gt;https://central.owncloud.com&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;small&gt;By Klaas Freitag, Daniel Molkentin, Olivier Goffart, Markus Götz,  Jan-Christoph Borchardt, Thomas Müller,&lt;br&gt;Dominik Schmidt, Michael Stingl, Hannah von Reth, Fabian Müller and others.&lt;/small&gt;&lt;/p&gt;&lt;p&gt;Copyright ownCloud GmbH (A Kiteworks Company)&lt;/p&gt;&lt;p&gt;Distributed by %4 and licensed under the GNU General Public License (GPL) Version 2.0.&lt;br/&gt;%5 and the %5 logo are registered trademarks of %4 in the United States, other countries, or both.&lt;/p&gt;&lt;p&gt;&lt;small&gt;%6&lt;/small&gt;&lt;/p&gt;</source>

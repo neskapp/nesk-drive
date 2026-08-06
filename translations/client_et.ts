@@ -818,8 +818,8 @@ Uuendus toimub taustal ja kirjutab praeguse AppImage&apos;i faili üle. Uuendami
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
-        <translation>Ühtegi ownCloud kontot pole seadistatud</translation>
+        <source>No %1 account configured</source>
+        <translation>Ühtegi %1 kontot pole seadistatud</translation>
     </message>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="290"/>

@@ -25,6 +25,9 @@
 #define QUOTE							L"\""
 #define VALUE							L"value"
 
-#define REGISTRY_ROOT_KEY			 L"SOFTWARE\\ownCloud Inc\\ownCloud"
+// Nothing reads this macro any more, upstream included: no such key is ever
+// created or looked up. Kept in step with the product name so that a future
+// use does not resurrect the ownCloud name.
+#define REGISTRY_ROOT_KEY			 L"SOFTWARE\\Neskapp\\Nesk Drive"
 #define REGISTRY_ENABLE_OVERLAY		 L"EnableOverlay"
 #define REGISTRY_FILTER_FOLDER		 L"FilterFolder"

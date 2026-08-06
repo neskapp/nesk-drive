@@ -71,7 +71,7 @@ void ConnectionValidator::checkServer(ConnectionValidator::ValidationMode mode)
 {
     _mode = mode;
     if (!_account) {
-        _errors << tr("No ownCloud account configured");
+        _errors << tr("No %1 account configured").arg(Theme::instance()->appNameGUI());
         reportResult(NotConfigured);
         return;
     }

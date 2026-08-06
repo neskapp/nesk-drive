@@ -160,7 +160,12 @@ static CSYNC_EXCLUDE_TYPE _csync_excluded_common(QStringView path)
                 return CSYNC_FILE_SILENTLY_EXCLUDED;
             }
         }
-        if (bname.startsWith(QLatin1String(".owncloudsync.log"), Qt::CaseInsensitive)) { // ".owncloudsync.log*"
+        // The sync run log is named after the product (see SyncRunFileLog::start).
+        // The historical ".owncloudsync.log" stays excluded on purpose: anyone who
+        // synced with an earlier build still has that file at the root of their
+        // folder, and dropping the rule would start uploading it.
+        if (bname.startsWith(QLatin1String("." APPLICATION_SHORTNAME "-sync.log"), Qt::CaseInsensitive) // ".<app>-sync.log*"
+            || bname.startsWith(QLatin1String(".owncloudsync.log"), Qt::CaseInsensitive)) { // ".owncloudsync.log*"
             return CSYNC_FILE_SILENTLY_EXCLUDED;
         }
     }

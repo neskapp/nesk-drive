@@ -818,8 +818,8 @@ La actualización se realizará en segundo plano, y sobreescribirá el actual fi
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
-        <translation>No se ha configurado ninguna cuenta de ownCloud</translation>
+        <source>No %1 account configured</source>
+        <translation>No se ha configurado ninguna cuenta de %1</translation>
     </message>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="290"/>

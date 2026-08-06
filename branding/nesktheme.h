@@ -15,6 +15,8 @@
 #pragma once
 
 #include "common/depreaction.h"
+#include "common/utility.h"
+#include "common/version.h"
 #include "config.h"
 #include "theme.h"
 
@@ -76,6 +78,50 @@ public:
     {
         return QStringLiteral("openid offline_access email profile");
     }
+
+    // Upstream points users at the ownCloud community forum and at a commit in
+    // owncloud/client that does not exist in this fork. Both would send a Nesk
+    // user to the wrong place, so the whole block is replaced.
+    //
+    // What must NOT be replaced, and is reproduced verbatim below: the ownCloud
+    // GmbH copyright notice, the upstream author list and the GPL notice. The
+    // GPL requires the copyright and licence notices to be kept, and removing
+    // the only nominative attribution in the product would be wrong regardless
+    // (see BRANDING.md). The link to our own sources also serves GPL section 3.
+    //
+    // The trademark sentence deliberately says "trademarks" and not "registered
+    // trademarks": upstream asserts registration for whatever vendor builds the
+    // client, which would be a false claim as long as no registration exists.
+    QString about() const override
+    {
+        return tr("<p>Version %1. For more information visit <a href=\"%2\">https://%3</a></p>"
+                  "<p>For help, please visit: <a href=\"https://nesk.ch/support\">https://nesk.ch/support</a></p>"
+                  "<p>Source code: <a href=\"https://github.com/neskapp/nesk-drive\">https://github.com/neskapp/nesk-drive</a></p>"
+                  "<p><small>By Klaas Freitag, Daniel Molkentin, Olivier Goffart, Markus Götz, "
+                  " Jan-Christoph Borchardt, Thomas Müller,<br>"
+                  "Dominik Schmidt, Michael Stingl, Hannah von Reth, Fabian Müller and others.</small></p>"
+                  "<p>Copyright ownCloud GmbH (A Kiteworks Company)</p>"
+                  "<p>Distributed by %4 and licensed under the GNU General Public License (GPL) Version 2.0.<br/>"
+                  "%5 and the %5 logo are trademarks of %4.</p>"
+                  "<p><small>%6</small></p>")
+            .arg(Utility::escape(Version::displayString()), Utility::escape(QStringLiteral("https://" APPLICATION_DOMAIN)),
+                Utility::escape(QStringLiteral(APPLICATION_DOMAIN)), Utility::escape(QStringLiteral(APPLICATION_VENDOR)),
+                Utility::escape(appNameGUI()), aboutVersions(Theme::VersionFormat::RichText));
+    }
+
+    // Two effects, both wanted. It hides the duplicate, untranslated copyright
+    // label at the bottom of the General settings page (generalsettings.cpp
+    // checks this flag), and it stops Theme::gitSHA1 from linking the commit to
+    // github.com/owncloud/client, where this fork's commits do not exist. The
+    // copyright notice itself stays in the About dialog above, which is what
+    // the GPL asks for.
+    bool aboutShowCopyright() const override { return false; }
+
+    // Derived from helpUrl() upstream, which would point at
+    // https://nesk.ch/drive/conflicts.html: no such page exists, and the sync
+    // error widget hides the link when it is empty. Point it at a real page
+    // once one is written.
+    QString conflictHelpUrl() const override { return QString(); }
 
     // Nesk brand: bordeaux header with white title (see BRANDING.md).
     QColor wizardHeaderBackgroundColor() const override { return QColor(0xB2, 0x3A, 0x4E); }

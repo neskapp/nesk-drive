@@ -818,8 +818,8 @@ De update wordt uitgevoerd op de achtergrond en zal het bestaande AppImage besta
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
-        <translation>Geen ownCloud-account geconfigureerd</translation>
+        <source>No %1 account configured</source>
+        <translation>Geen %1-account geconfigureerd</translation>
     </message>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="290"/>

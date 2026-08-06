@@ -25,6 +25,7 @@
 #include "common/syncjournalfilerecord.h"
 #include "common/version.h"
 #include "common/vfs.h"
+#include "config.h"
 #include "configfile.h"
 #include "filesystem.h"
 #include "folderman.h"
@@ -1141,7 +1142,8 @@ void Folder::registerFolderWatcher()
     connect(_folderWatcher.data(), &FolderWatcher::becameUnreliable,
         this, &Folder::slotWatcherUnreliable);
     _folderWatcher->init(path());
-    _folderWatcher->startNotificatonTest(path() + QLatin1String(".owncloudsync.log"));
+    // Must designate the same file as SyncRunFileLog::start.
+    _folderWatcher->startNotificatonTest(path() + QLatin1String("." APPLICATION_SHORTNAME "-sync.log"));
 }
 
 bool Folder::virtualFilesEnabled() const

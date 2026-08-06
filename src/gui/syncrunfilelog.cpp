@@ -16,6 +16,7 @@
 
 #include "syncrunfilelog.h"
 #include "common/utility.h"
+#include "config.h"
 #include "filesystem.h"
 #include <qfileinfo.h>
 
@@ -37,8 +38,9 @@ void SyncRunFileLog::start(const QString &folderPath)
 {
     const qint64 logfileMaxSize = 10 * 1024 * 1024; // 10MiB
 
-    // Note; this name is ignored in csync_exclude.c
-    const QString filename = folderPath + QStringLiteral(".owncloudsync.log");
+    // Note; this name is ignored in csync_exclude.cpp, which has to be kept in
+    // step with it, otherwise the log itself ends up being uploaded.
+    const QString filename = folderPath + QStringLiteral("." APPLICATION_SHORTNAME "-sync.log");
 
     // When the file is too big, just rename it to an old name.
     QFileInfo info(filename);

@@ -64,6 +64,40 @@ private Q_SLOTS:
     {
         QVERIFY(!Theme::instance()->multiAccount());
     }
+
+    // The About dialog is the one place where a rebranded fork can quietly break
+    // the law. These assertions are a guard rail, not decoration: they fail if a
+    // future edit drops a notice the GPL requires us to keep.
+    void testAboutKeepsUpstreamNotices()
+    {
+        const QString about = Theme::instance()->about();
+        QVERIFY(about.contains(QStringLiteral("Copyright ownCloud GmbH")));
+        QVERIFY(about.contains(QStringLiteral("GNU General Public License")));
+        QVERIFY(about.contains(QStringLiteral("Klaas Freitag")));
+        QVERIFY(about.contains(QStringLiteral("Hannah von Reth")));
+        // GPL section 3: the corresponding sources must be reachable.
+        QVERIFY(about.contains(QStringLiteral("github.com/neskapp/nesk-drive")));
+    }
+
+    void testAboutSendsUsersToNesk()
+    {
+        Theme *theme = Theme::instance();
+        const QString about = theme->about();
+        // Support must not point at the ownCloud community forum.
+        QVERIFY(!about.contains(QStringLiteral("central.owncloud.com")));
+        QVERIFY(about.contains(QStringLiteral("https://nesk.ch/support")));
+        // Claiming a registered trademark we do not hold would be a false
+        // statement; upstream asserts it for whatever vendor builds the client.
+        QVERIFY(!about.contains(QStringLiteral("registered trademarks")));
+        QVERIFY(about.contains(QStringLiteral("trademarks of Neskapp")));
+        // Hides the duplicate copyright label in the settings, and keeps
+        // Theme::gitSHA1 from linking to a commit that does not exist upstream.
+        QVERIFY(!theme->aboutShowCopyright());
+        QVERIFY(!theme->aboutVersions(Theme::VersionFormat::RichText)
+                     .contains(QStringLiteral("github.com/owncloud/client")));
+        // Empty on purpose: the derived URL would be a 404.
+        QVERIFY(theme->conflictHelpUrl().isEmpty());
+    }
 };
 
 QTEST_GUILESS_MAIN(TestNeskTheme)

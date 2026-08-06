@@ -816,7 +816,7 @@ The update will be performed in the background, and overwrite the current AppIma
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
+        <source>No %1 account configured</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -818,8 +818,8 @@ L&apos;aggiornamento verrà eseguito in background e sovrascriverà il file AppI
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
-        <translation>Nessun account ownCloud configurato.</translation>
+        <source>No %1 account configured</source>
+        <translation>Nessun account %1 configurato.</translation>
     </message>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="290"/>

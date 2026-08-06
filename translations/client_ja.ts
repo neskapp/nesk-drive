@@ -818,8 +818,8 @@ AppImage の更新はバックグラウンドプロセスで実行され、現�
     <name>OCC::ConnectionValidator</name>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="74"/>
-        <source>No ownCloud account configured</source>
-        <translation>ownCloudアカウントが設定されていません</translation>
+        <source>No %1 account configured</source>
+        <translation>%1アカウントが設定されていません</translation>
     </message>
     <message>
         <location filename="../src/gui/connectionvalidator.cpp" line="290"/>
