@@ -260,6 +260,46 @@ jobs:
           }
           Write-Output "The package carries the client executable"
 
+      - name: Check the registration is accepted by the server
+        env:
+          NESK_CLIENT_ID: ${{ secrets.NESK_OIDC_CLIENT_ID }}
+          NESK_CLIENT_SECRET: ${{ secrets.NESK_OIDC_CLIENT_SECRET }}
+          NESK_ISSUER: ${{ vars.NESK_OIDC_ISSUER || 'https://nesk.ch/oidc' }}
+        run: |
+          # The identity provider holds a single client_secret per client, with no grace period:
+          # rotating it server side without rebuilding leaves every installed client unable to sign
+          # in and unable to refresh, which is exactly how the August 2026 outage happened. Ask the
+          # server whether the registration we just compiled in is the one it knows, before anyone
+          # downloads the installer.
+          if (-not $env:NESK_CLIENT_SECRET) {
+            Write-Output "No registration configured, nothing to check"
+            exit 0
+          }
+
+          # A deliberately invalid refresh token: client authentication is checked first, so the
+          # error code tells the two failures apart without needing a real grant.
+          $pair = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("$($env:NESK_CLIENT_ID):$($env:NESK_CLIENT_SECRET)"))
+          $body = & curl.exe --silent --show-error --max-time 30 `
+            --header "Authorization: Basic $pair" `
+            --data "grant_type=refresh_token&refresh_token=nesk-ci-probe" `
+            "$env:NESK_ISSUER/token"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::warning::Could not reach $env:NESK_ISSUER to verify the registration, skipping the check."
+            exit 0
+          }
+
+          # Only the error code is ever printed, never the response as a whole.
+          $code = try { ($body | ConvertFrom-Json).error } catch { "unparseable" }
+          Write-Output "Token endpoint answered: $code"
+          if ($code -eq "invalid_client") {
+            throw "The server rejects this registration (invalid_client): the secret compiled into this build does not match the deployed one. Update NESK_OIDC_CLIENT_SECRET from .env.prod and rebuild before publishing."
+          }
+          if ($code -ne "invalid_grant") {
+            Write-Output "::warning::Unexpected answer from the token endpoint ($code), the registration could not be confirmed."
+            exit 0
+          }
+          Write-Output "The server accepts this registration"
+
       - name: Upload artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
